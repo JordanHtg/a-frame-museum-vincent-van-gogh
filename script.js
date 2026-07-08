@@ -19,7 +19,7 @@
  * - Jika dikosongkan (""), museum memutar sintesis Beethoven - Für Elise.
  * ============================================================================
  */
-const CUSTOM_AUDIO_PATH = "assets/audio/Fur_Elise.mp3";
+const CUSTOM_AUDIO_PATH = "assets/audio/Virginio-Van-Gogh.mp3";
 
 
 const MUSEUM_CATALOG = {
