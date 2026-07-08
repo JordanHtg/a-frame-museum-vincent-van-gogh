@@ -1,0 +1,436 @@
+/* ==========================================================================
+   MUSEUM SENI VINCENT VAN GOGH - VIRTUAL EXHIBITION
+   Professional Stylesheet (Vanilla CSS3)
+   Palette: #F7F1E5 | #DDB967 | #8B5E3C | #5A3E2B | #F2D8A7 | #FFF8EE
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap');
+
+:root {
+  --color-cream: #F7F1E5;
+  --color-gold: #DDB967;
+  --color-wood: #8B5E3C;
+  --color-dark-wood: #5A3E2B;
+  --color-light-gold: #F2D8A7;
+  --color-warm-white: #FFF8EE;
+  --color-accent-blue: #3A6B88;
+  --color-dark-overlay: rgba(18, 14, 10, 0.85);
+  
+  --font-heading: 'Cinzel', 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  --shadow-gold: 0 0 25px rgba(221, 185, 103, 0.35);
+  --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background-color: #120E0A;
+  color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   A-FRAME SCENE & CANVAS
+   ========================================================================== */
+a-scene {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+/* ==========================================================================
+   USER INTERFACE HUD OVERLAYS
+   ========================================================================== */
+#hud-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 32px;
+}
+
+/* TOP BAR: MUSEUM BRANDING */
+.hud-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.museum-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(26, 20, 15, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px 22px;
+  border-radius: 50px;
+  border: 1px solid rgba(221, 185, 103, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-wood));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-warm-white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 0 15px rgba(221, 185, 103, 0.5);
+}
+
+.brand-text h1 {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--color-gold);
+  line-height: 1.1;
+}
+
+.brand-text span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-cream);
+  opacity: 0.85;
+}
+
+/* AUDIO & FPS INDICATOR */
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.hud-btn {
+  background: rgba(26, 20, 15, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(221, 185, 103, 0.35);
+  color: var(--color-cream);
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-btn:hover {
+  background: rgba(221, 185, 103, 0.2);
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold);
+}
+
+/* CENTER RETICLE / CROSSHAIR WITH GAZE PROGRESS */
+.crosshair-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.reticle-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--color-gold);
+  transition: transform 0.2s ease;
+}
+
+.crosshair-wrapper.hovering .reticle-dot {
+  transform: scale(1.6);
+  background-color: #FFF;
+}
+
+.progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 3;
+  stroke-dasharray: 113.1;
+  stroke-dashoffset: 113.1;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.08s linear;
+}
+
+/* BOTTOM BAR: CONTROLS & GALLERY LOCATION */
+.hud-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.controls-guide {
+  background: rgba(26, 20, 15, 0.8);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(221, 185, 103, 0.3);
+  padding: 16px 22px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  max-width: 340px;
+}
+
+.controls-guide h3 {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--color-gold);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-cream);
+}
+
+.kbd {
+  background: rgba(221, 185, 103, 0.15);
+  border: 1px solid rgba(221, 185, 103, 0.4);
+  color: var(--color-light-gold);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* LOCATION / MINIMAP INDICATOR */
+.location-tracker {
+  background: rgba(26, 20, 15, 0.8);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(221, 185, 103, 0.3);
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  text-align: right;
+}
+
+.location-tracker .label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--color-light-gold);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.location-tracker .current-room {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+/* ==========================================================================
+   INFO PANEL MODAL (ARTWORK INSPECT)
+   ========================================================================== */
+#info-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(18, 14, 10, 0.72);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 24px;
+}
+
+#info-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.info-card {
+  background: linear-gradient(145deg, rgba(38, 28, 20, 0.95), rgba(22, 16, 11, 0.98));
+  border: 1px solid var(--color-gold);
+  border-radius: 20px;
+  max-width: 620px;
+  width: 100%;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), var(--shadow-gold);
+  overflow: hidden;
+  transform: translateY(24px) scale(0.96);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+#info-modal.active .info-card {
+  transform: translateY(0) scale(1);
+}
+
+.info-card-header {
+  position: relative;
+  height: 265px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #2B2118 0%, #120E0A 100%);
+  border-bottom: 2px solid var(--color-gold);
+  padding: 12px;
+}
+
+.info-card-header img {
+  width: 100%;
+  height: 100%;
+  max-height: 245px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+  transition: transform 0.3s ease;
+}
+
+.info-badge {
+  position: absolute;
+  bottom: 16px;
+  left: 24px;
+  background: rgba(26, 20, 15, 0.88);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 30px;
+  letter-spacing: 1px;
+}
+
+.info-card-body {
+  padding: 30px 32px;
+}
+
+.info-card-body h2 {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--color-warm-white);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.info-card-body .subtitle {
+  color: var(--color-gold);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+}
+
+.info-card-body p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-cream);
+  white-space: pre-line;
+  margin-bottom: 24px;
+}
+
+.info-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(221, 185, 103, 0.2);
+  padding-top: 20px;
+}
+
+.close-modal-btn {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-wood));
+  border: none;
+  color: #120E0A;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 30px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 15px rgba(221, 185, 103, 0.3);
+}
+
+.close-modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(221, 185, 103, 0.5);
+}
+
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (DESKTOP, LAPTOP, TABLET)
+   ========================================================================== */
+@media (max-width: 900px) {
+  #hud-container {
+    padding: 16px;
+  }
+  .controls-guide {
+    display: none;
+  }
+  .brand-text h1 {
+    font-size: 14px;
+  }
+  .info-card {
+    max-width: 90vw;
+  }
+  .start-box {
+    padding: 28px;
+  }
+}

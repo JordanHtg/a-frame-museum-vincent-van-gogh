@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museum Seni Vincent Van Gogh - Virtual 3D Exhibition</title>
+  <!-- A-Frame WebXR & 3D Framework -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+
+  <!-- =========================================================================
+       USER INTERFACE OVERLAYS & GLASSMORPHISM HUD
+       ========================================================================= -->
+  <div id="hud-container">
+    <!-- TOP BAR -->
+    <div class="hud-top-bar">
+      <div class="museum-brand">
+        <div class="brand-icon">VG</div>
+        <div class="brand-text">
+          <h1>VINCENT VAN GOGH</h1>
+          <span>Virtual Museum Exhibition</span>
+        </div>
+      </div>
+      <div class="hud-actions">
+        <button id="audio-toggle-btn" class="hud-btn">🔊 Suara: ON</button>
+      </div>
+    </div>
+
+    <!-- CENTER RETICLE & GAZE PROGRESS BAR (RAYCASTER CROSSHAIR) -->
+    <div class="crosshair-wrapper">
+      <svg class="progress-ring" width="44" height="44">
+        <circle class="progress-ring-circle" cx="22" cy="22" r="18"></circle>
+      </svg>
+      <div class="reticle-dot"></div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="hud-bottom-bar">
+      <div class="controls-guide">
+        <h3>PANDUAN KONTROL PLAYER</h3>
+        <div class="controls-grid">
+          <div class="control-item"><span class="kbd">W A S D</span> Berjalan</div>
+          <div class="control-item"><span class="kbd">MOUSE</span> Lihat Sekitar</div>
+          <div class="control-item"><span class="kbd">SPACE</span> Lompat</div>
+          <div class="control-item"><span class="kbd">KLIK KIRI</span> Tembakkan Orb</div>
+        </div>
+      </div>
+
+      <div class="location-tracker">
+        <div class="label">LOKASI PENGUNJUNG</div>
+        <div id="current-room-text" class="current-room">Lobby</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ARTWORK INSPECT INFORMATION MODAL (1s RAYCASTER GAZE TARGET)
+       ========================================================================= -->
+  <div id="info-modal">
+    <div class="info-card">
+      <div class="info-card-header">
+        <img id="modal-image" src="assets/images/starry_night.jpg" alt="Artwork Preview">
+        <div id="modal-badge" class="info-badge">1889</div>
+      </div>
+      <div class="info-card-body">
+        <h2 id="modal-title">The Starry Night</h2>
+        <div id="modal-subtitle" class="subtitle">1889 • Saint-Rémy-de-Provence, Prancis</div>
+        <p id="modal-description">Deskripsi karya seni akan muncul di sini.</p>
+        <div class="info-card-footer">
+          <span style="font-size: 12px; color: var(--color-gold);">🏛️ Koleksi Eksklusif Museum Seni Vincent Van Gogh</span>
+          <button id="close-modal-btn" class="close-modal-btn">TUTUP PANEL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       A-FRAME 3D VIRTUAL MUSEUM SCENE
+       ========================================================================= -->
+  <a-scene
+    background="color: #120E0A"
+    shadow="type: pcfsoft"
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true">
+
+    <!-- 1. ASSETS PRELOADER -->
+    <a-assets timeout="10000">
+      <img id="tex-floor" src="assets/textures/wood_floor.png">
+      <img id="tex-wall" src="assets/textures/wall_plaster.png">
+      <img id="tex-gold" src="assets/textures/gold_frame.png">
+
+      <!-- Artwork Canvas Textures -->
+      <img id="art-starry" src="assets/images/starry_night.jpg">
+      <img id="art-sunflowers" src="assets/images/sunflowers.jpg">
+      <img id="art-bedroom" src="assets/images/bedroom_in_arles.jpg">
+
+      <!-- 3D GLB Models -->
+      <a-asset-item id="van-gogh-glb" src="assets/models/van_gogh_character.glb"></a-asset-item>
+      <a-asset-item id="bench-glb" src="assets/models/museum_bench.glb"></a-asset-item>
+      <a-asset-item id="pot-glb" src="assets/models/flower_pot.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- 2. MUSEUM WARM LIGHTING SYSTEM -->
+    <!-- Ambient Light (#FFF8EE) -->
+    <a-entity light="type: ambient; color: #FFF8EE; intensity: 0.45"></a-entity>
+    <!-- Directional Light (#F7F1E5) -->
+    <a-entity light="type: directional; color: #F7F1E5; intensity: 0.7; castShadow: true"
+              position="3 8 4"></a-entity>
+
+    <!-- Dedicated Spotlights for each exhibit -->
+    <!-- Spotlight 1: Starry Night -->
+    <a-entity light="type: spot; color: #F2D8A7; intensity: 2.2; angle: 45; penumbra: 0.45"
+              position="-3.6 5.5 1.5"
+              rotation="-40 30 0"></a-entity>
+    <!-- Spotlight 2: Sunflowers -->
+    <a-entity light="type: spot; color: #FFF8EE; intensity: 2.2; angle: 45; penumbra: 0.45"
+              position="3.6 5.5 -4.5"
+              rotation="-40 -30 0"></a-entity>
+    <!-- Spotlight 3: Bedroom in Arles -->
+    <a-entity light="type: spot; color: #F2D8A7; intensity: 2.2; angle: 45; penumbra: 0.45"
+              position="-3.6 5.5 -10.5"
+              rotation="-40 30 0"></a-entity>
+    <!-- Spotlight 4: Rotunda Van Gogh Sculpture -->
+    <a-entity light="type: spot; color: #DDB967; intensity: 2.8; angle: 50; penumbra: 0.5"
+              position="0 6.5 -16"
+              rotation="-90 0 0"></a-entity>
+
+    <!-- 3. MUSEUM ARCHITECTURE (FLOOR, WALLS, CEILING, PILLARS) -->
+    <!-- Hardwood Parquet Floor -->
+    <a-plane position="0 0 -6" rotation="-90 0 0" width="10" height="42"
+             material="src: #tex-floor; repeat: 4 16; roughness: 0.55; metalness: 0.1"
+             shadow="receive: true"></a-plane>
+
+    <!-- Warm Gallery Ceiling -->
+    <a-plane position="0 5.5 -6" rotation="90 0 0" width="10" height="42"
+             material="color: #FFF8EE; roughness: 0.9"></a-plane>
+
+    <!-- West Wall (#F7F1E5 Plaster) -->
+    <a-plane position="-5 2.75 -6" rotation="0 90 0" width="42" height="5.5"
+             material="src: #tex-wall; repeat: 14 2; roughness: 0.8; color: #F7F1E5"></a-plane>
+    <!-- East Wall (#F7F1E5 Plaster) -->
+    <a-plane position="5 2.75 -6" rotation="0 -90 0" width="42" height="5.5"
+             material="src: #tex-wall; repeat: 14 2; roughness: 0.8; color: #F7F1E5"></a-plane>
+    <!-- North Wall (End of Rotunda/Exit) -->
+    <a-plane position="0 2.75 -27" rotation="0 0 0" width="10" height="5.5"
+             material="color: #5A3E2B; roughness: 0.7"></a-plane>
+    <!-- South Wall (Entrance Lobby Back Wall) -->
+    <a-plane position="0 2.75 15" rotation="0 180 0" width="10" height="5.5"
+             material="color: #5A3E2B; roughness: 0.7"></a-plane>
+
+    <!-- Elegant Architectural Pillars & Gold Trim -->
+    <a-entity id="pillars">
+      <a-box position="-4.7 2.75 8" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="4.7 2.75 8" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="-4.7 2.75 2" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="4.7 2.75 2" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="-4.7 2.75 -8" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="4.7 2.75 -8" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="-4.7 2.75 -14" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+      <a-box position="4.7 2.75 -14" width="0.6" height="5.5" depth="0.6" material="color: #5A3E2B"></a-box>
+    </a-entity>
+
+    <!-- Museum Benches & Potted Sunflowers -->
+    <a-entity gltf-model="#bench-glb" position="0 0 10" scale="1.4 1.4 1.4" shadow="cast: true"></a-entity>
+    <a-entity gltf-model="#bench-glb" position="0 0 0" scale="1.4 1.4 1.4" shadow="cast: true"></a-entity>
+    <a-entity gltf-model="#bench-glb" position="0 0 -10" scale="1.4 1.4 1.4" shadow="cast: true"></a-entity>
+
+    <a-entity gltf-model="#pot-glb" position="-4.2 0 12" scale="1.3 1.3 1.3"></a-entity>
+    <a-entity gltf-model="#pot-glb" position="4.2 0 12" scale="1.3 1.3 1.3"></a-entity>
+    <a-entity gltf-model="#pot-glb" position="-4.2 0 -5" scale="1.3 1.3 1.3"></a-entity>
+    <a-entity gltf-model="#pot-glb" position="4.2 0 -11" scale="1.3 1.3 1.3"></a-entity>
+
+    <!-- Entrance Lobby Banner & Welcome Sign -->
+    <a-entity position="0 3.8 11.8">
+      <a-plane width="5.2" height="1.1" material="color: #5A3E2B"></a-plane>
+      <a-plane width="5.0" height="0.95" position="0 0 0.02" material="color: #120E0A"></a-plane>
+      <a-text value="MUSEUM SENI VINCENT VAN GOGH" align="center" position="0 0.16 0.04"
+              color="#DDB967" width="8" font="mozillavr"></a-text>
+      <a-text value="GALERI PERMANEN • ARLES & SAINT-REMY COLLECTION" align="center" position="0 -0.2 0.04"
+              color="#F7F1E5" width="4.8"></a-text>
+    </a-entity>
+
+    <!-- =======================================================================
+         4. EXHIBITIONS & ARTWORKS WITH FLOATING GOLD INTERACTIVE SPHERES
+         ======================================================================= -->
+
+    <!-- EXHIBIT 1: THE STARRY NIGHT (WEST WALL, Z: 0) -->
+    <a-entity position="-4.9 2.5 0" rotation="0 90 0">
+      <!-- Ornate Gold 3D Frame -->
+      <a-box width="3.2" height="2.4" depth="0.12" material="src: #tex-gold; color: #DDB967; metalness: 0.45"></a-box>
+      <!-- Canvas Painting -->
+      <a-plane width="2.9" height="2.1" position="0 0 0.07" material="src: #art-starry; roughness: 0.35"></a-plane>
+      <!-- Gold Title Plaque below -->
+      <a-box position="0 -1.45 0.06" width="1.2" height="0.28" depth="0.04" material="color: #DDB967"></a-box>
+      <a-text value="The Starry Night (1889)" align="center" position="0 -1.45 0.09" color="#120E0A" width="2.6"></a-text>
+    </a-entity>
+
+    <!-- FLOATING GOLDEN SPHERE (STARRY NIGHT INTERACTIVE POINT) -->
+    <a-sphere class="interactive-sphere"
+              artwork-inspector="exhibitId: starry-night"
+              position="-3.6 1.25 0"
+              radius="0.16"
+              material="color: #DDB967; emissive: #F2D8A7; emissiveIntensity: 0.65; transparent: true; opacity: 0.88; roughness: 0.1"
+              animation="property: position; dir: alternate; dur: 2200; easing: easeInOutSine; loop: true; to: -3.6 1.45 0">
+    </a-sphere>
+
+    <!-- EXHIBIT 2: SUNFLOWERS (EAST WALL, Z: -6) -->
+    <a-entity position="4.9 2.5 -6" rotation="0 -90 0">
+      <!-- Ornate Gold 3D Frame -->
+      <a-box width="2.6" height="3.2" depth="0.12" material="src: #tex-gold; color: #DDB967; metalness: 0.45"></a-box>
+      <!-- Canvas Painting -->
+      <a-plane width="2.3" height="2.9" position="0 0 0.07" material="src: #art-sunflowers; roughness: 0.35"></a-plane>
+      <!-- Gold Title Plaque -->
+      <a-box position="0 -1.82 0.06" width="1.3" height="0.28" depth="0.04" material="color: #DDB967"></a-box>
+      <a-text value="Sunflowers (1888)" align="center" position="0 -1.82 0.09" color="#120E0A" width="2.6"></a-text>
+    </a-entity>
+
+    <!-- FLOATING GOLDEN SPHERE (SUNFLOWERS INTERACTIVE POINT) -->
+    <a-sphere class="interactive-sphere"
+              artwork-inspector="exhibitId: sunflowers"
+              position="3.6 1.25 -6"
+              radius="0.16"
+              material="color: #DDB967; emissive: #F2D8A7; emissiveIntensity: 0.65; transparent: true; opacity: 0.88; roughness: 0.1"
+              animation="property: position; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; to: 3.6 1.45 -6">
+    </a-sphere>
+
+    <!-- EXHIBIT 3: BEDROOM IN ARLES (WEST WALL, Z: -12) -->
+    <a-entity position="-4.9 2.5 -12" rotation="0 90 0">
+      <!-- Ornate Gold 3D Frame -->
+      <a-box width="3.2" height="2.4" depth="0.12" material="src: #tex-gold; color: #DDB967; metalness: 0.45"></a-box>
+      <!-- Canvas Painting -->
+      <a-plane width="2.9" height="2.1" position="0 0 0.07" material="src: #art-bedroom; roughness: 0.35"></a-plane>
+      <!-- Gold Title Plaque -->
+      <a-box position="0 -1.45 0.06" width="1.3" height="0.28" depth="0.04" material="color: #DDB967"></a-box>
+      <a-text value="Bedroom in Arles (1888)" align="center" position="0 -1.45 0.09" color="#120E0A" width="2.6"></a-text>
+    </a-entity>
+
+    <!-- FLOATING GOLDEN SPHERE (BEDROOM IN ARLES INTERACTIVE POINT) -->
+    <a-sphere class="interactive-sphere"
+              artwork-inspector="exhibitId: bedroom-arles"
+              position="-3.6 1.25 -12"
+              radius="0.16"
+              material="color: #DDB967; emissive: #F2D8A7; emissiveIntensity: 0.65; transparent: true; opacity: 0.88; roughness: 0.1"
+              animation="property: position; dir: alternate; dur: 2400; easing: easeInOutSine; loop: true; to: -3.6 1.45 -12">
+    </a-sphere>
+
+    <!-- EXHIBIT 4: VINCENT VAN GOGH 3D CHARACTER SCULPTURE ROTUNDA (Z: -18) -->
+    <a-entity id="rotunda-center" position="0 0 -18">
+      <!-- Circular Gold & Wood Display Pedestal -->
+      <a-cylinder radius="1.8" height="0.3" position="0 0.15 0" material="color: #5A3E2B; roughness: 0.4"></a-cylinder>
+      <a-cylinder radius="1.6" height="0.08" position="0 0.34 0" material="color: #DDB967; metalness: 0.5"></a-cylinder>
+
+      <!-- Rotating 3D Character Vincent Van Gogh -->
+      <a-entity id="vangogh-model"
+                gltf-model="#van-gogh-glb"
+                position="0 0.38 0"
+                scale="1.3 1.3 1.3"
+                animation__rotate="property: rotation; to: 0 360 0; dur: 20000; loop: true; easing: linear"
+                animation__float="property: position; dir: alternate; dur: 3000; loop: true; to: 0 0.46 0">
+      </a-entity>
+
+      <!-- Sculpture Title Plaque -->
+      <a-box position="0 0.8 1.4" width="1.6" height="0.38" depth="0.08" material="color: #DDB967"></a-box>
+      <a-text value="Vincent Van Gogh (1853-1890)" align="center" position="0 0.8 1.45" color="#120E0A" width="2.8"></a-text>
+    </a-entity>
+
+    <!-- FLOATING GOLDEN SPHERE (VAN GOGH CHARACTER INTERACTIVE POINT) -->
+    <a-sphere class="interactive-sphere"
+              artwork-inspector="exhibitId: van-gogh-sculpture"
+              position="0 1.35 -16.2"
+              radius="0.18"
+              material="color: #DDB967; emissive: #F2D8A7; emissiveIntensity: 0.75; transparent: true; opacity: 0.9; roughness: 0.1"
+              animation="property: position; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true; to: 0 1.55 -16.2">
+    </a-sphere>
+
+
+
+    <!-- =======================================================================
+         5. PLAYER RIG (FIRST PERSON CONTROLLER + RAYCASTER + SHOOTER)
+         ======================================================================= -->
+    <a-entity id="player-rig"
+              position="0 1.12 13"
+              player-museum-controller
+              projectile-pool-shooter>
+
+      <!-- CAMERA -->
+      <a-camera id="camera"
+                wasd-controls="acceleration: 15"
+                look-controls="pointerLockEnabled: true">
+
+        <!-- RAYCASTER CENTER FOR DETECTING GOLD SPHERES -->
+        <a-entity id="raycaster-cursor"
+                  raycaster="objects: .interactive-sphere; interval: 50"
+                  position="0 0 -1">
+        </a-entity>
+      </a-camera>
+    </a-entity>
+
+  </a-scene>
+
+  <!-- External JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
