@@ -120,12 +120,9 @@ a-scene {
   opacity: 0.85;
 }
 
-/* AUDIO & FPS INDICATOR */
-.hud-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  pointer-events: auto;
+/* AUDIO & FPS INDICATOR (HIDDEN AS REQUESTED) */
+.hud-actions, #audio-toggle-btn {
+  display: none !important;
 }
 
 .hud-btn {

@@ -19,7 +19,7 @@
  * - Jika dikosongkan (""), museum memutar sintesis Beethoven - Für Elise.
  * ============================================================================
  */
-const CUSTOM_AUDIO_PATH = "assets/audio/Virginio-Van-Gogh.mp3";
+const CUSTOM_AUDIO_PATH = "";
 
 
 const MUSEUM_CATALOG = {
@@ -72,7 +72,7 @@ class MuseumAudioEngine {
   }
 
   init() {
-    // 1) Inisialisasi AudioContext untuk sound effects (hover, langkah kaki, tembakan)
+    // Inisialisasi AudioContext hanya untuk sound effects (hover, langkah kaki, tembakan)
     if (!this.ctx) {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -83,19 +83,6 @@ class MuseumAudioEngine {
     } else if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
-
-    // 2) Mainkan file audio latar tunggal (Fur_Elise.mp3) tanpa ada double audio
-    if (this.audioStarted) return;
-    this.audioStarted = true;
-
-    const audioPath = CUSTOM_AUDIO_PATH || "assets/audio/Fur_Elise.mp3";
-    this.bgAudio = new Audio(audioPath);
-    this.bgAudio.loop = true;
-    this.bgAudio.volume = 0.5;
-    this.bgAudio.play().catch(err => {
-      // Jika browser memblokir autoplay, tunggu klik/keydown pertama
-      this.audioStarted = false;
-    });
   }
 
   toggleMute() {
@@ -416,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     audioBtn.addEventListener('click', () => {
       museumAudio.init();
       const muted = museumAudio.toggleMute();
-      audioBtn.innerHTML = muted ? '🔇 Suara: OFF' : '🔊 Suara: ON';
+      audioBtn.innerHTML = muted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
     });
   }
 });
