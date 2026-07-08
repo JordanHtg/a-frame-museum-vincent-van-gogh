@@ -182,6 +182,47 @@
     </a-entity>
 
     <!-- =======================================================================
+         3D ANTIQUE WALL-MOUNTED RADIO & SPATIAL AUDIO SPEAKER (CENTER GALLERY)
+         ======================================================================= -->
+    <a-entity id="antique-spatial-radio" position="0 5 0">
+      <!-- Mahogany Wooden Wall Shelf -->
+      <a-box width="1.1" height="0.08" depth="0.7" material="color: #4A2E18; roughness: 0.4"></a-box>
+      <!-- Gold Brass Supporting Brackets -->
+      <a-box position="-0.4 -0.16 0" width="0.06" height="0.3" depth="0.5" rotation="0 0 -25" material="color: #DDB967; metalness: 0.6"></a-box>
+      <a-box position="0.4 -0.16 0" width="0.06" height="0.3" depth="0.5" rotation="0 0 25" material="color: #DDB967; metalness: 0.6"></a-box>
+      <!-- Vintage Wood Radio Cabinet -->
+      <a-box position="0 0.28 0" width="0.75" height="0.45" depth="0.48" material="color: #3A2010; roughness: 0.35"></a-box>
+      <!-- Gold Brass Speaker Dial Grille -->
+      <a-cylinder position="0 0.28 0.25" radius="0.14" height="0.02" rotation="90 0 0" material="color: #DDB967; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <!-- Glowing Warm Vacuum Tube Indicator Lamp -->
+      <a-sphere position="0.22 0.38 0.25" radius="0.035" material="color: #FFB049; emissive: #FF9010; emissiveIntensity: 0.9"></a-sphere>
+      <!-- Acoustic Brass Gramophone Horn Speaker -->
+      <a-cone position="0 0.72 0.1" radius-bottom="0.04" radius-top="0.34" height="0.6" rotation="20 0 0" material="color: #DDB967; metalness: 0.8; roughness: 0.2" open-ended="true"></a-cone>
+      <!-- Pulsing Acoustic Sound Wave Ring -->
+      <a-ring position="0 0.88 0.25" radius-inner="0.36" radius-outer="0.42" rotation="-20 0 0"
+              material="color: #DDB967; emissive: #F2D8A7; transparent: true; opacity: 0.6; side: double"
+              animation="property: scale; dir: normal; dur: 2000; easing: easeOutQuad; loop: true; from: 0.8 0.8 0.8; to: 1.6 1.6 1.6"
+              animation__alpha="property: material.opacity; dur: 2000; easing: easeOutQuad; loop: true; from: 0.6; to: 0">
+      </a-ring>
+      <!-- Gold Plaque label -->
+      <a-plane position="0 -0.05 0.36" width="0.85" height="0.14" material="color: #120E0A"></a-plane>
+      <a-text value="-" align="center" position="0 -0.05 0.37" color="#DDB967" width="2.4"></a-text>
+
+      <!-- 3D POSITIONAL SPATIAL AUDIO COMPONENT -->
+      <a-sound id="museum-radio-sound"
+               src="url(assets/audio/Virginio-Van-Gogh.mp3)"
+               autoplay="true"
+               loop="true"
+               positional="true"
+               distanceModel="inverse"
+               refDistance="2.5"
+               maxDistance="18"
+               rolloffFactor="1.6"
+               volume="0.95">
+      </a-sound>
+    </a-entity>
+
+    <!-- =======================================================================
          4. EXHIBITIONS & ARTWORKS WITH FLOATING GOLD INTERACTIVE SPHERES
          ======================================================================= -->
 

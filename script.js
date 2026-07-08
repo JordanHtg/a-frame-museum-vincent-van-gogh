@@ -386,6 +386,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (museumAudio && !museumAudio.audioStarted) {
       museumAudio.init();
     }
+    const radioSoundEl = document.getElementById('museum-radio-sound');
+    if (radioSoundEl && radioSoundEl.components && radioSoundEl.components.sound) {
+      radioSoundEl.components.sound.playSound();
+    }
     window.removeEventListener('click', unlockAudio);
     window.removeEventListener('keydown', unlockAudio);
   };
