@@ -141,6 +141,47 @@ class MuseumAudioEngine {
     osc.connect(gain); gain.connect(this.ctx.destination);
     osc.start(); osc.stop(this.ctx.currentTime + 0.18);
   }
+
+  startMagicalAmbient() {
+    if (!this.ctx || this.isMuted) return;
+    if (this.ambientOsc) return; 
+    
+    this.ambientOsc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    this.ambientOsc.type = 'triangle';
+    this.ambientOsc.frequency.setValueAtTime(110, this.ctx.currentTime); 
+    
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.06, this.ctx.currentTime + 2); 
+    
+    const lfo = this.ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(0.15, this.ctx.currentTime);
+    const lfoGain = this.ctx.createGain();
+    lfoGain.gain.setValueAtTime(8, this.ctx.currentTime);
+    lfo.connect(lfoGain);
+    lfoGain.connect(this.ambientOsc.frequency);
+    lfo.start();
+    this.ambientLfo = lfo;
+    
+    this.ambientOsc.connect(gain);
+    gain.connect(this.ctx.destination);
+    this.ambientOsc.start();
+    this.ambientGain = gain;
+  }
+
+  stopMagicalAmbient() {
+    if (this.ambientOsc && this.ambientGain) {
+      this.ambientGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1);
+      setTimeout(() => {
+        if (this.ambientOsc) {
+          this.ambientOsc.stop();
+          this.ambientOsc = null;
+          if (this.ambientLfo) this.ambientLfo.stop();
+        }
+      }, 1000);
+    }
+  }
 }
 
 const museumAudio = new MuseumAudioEngine();
@@ -179,8 +220,8 @@ AFRAME.registerComponent('artwork-inspector', {
     this.onRaycasterIntersected = this.onRaycasterIntersected.bind(this);
     this.onRaycasterIntersectedCleared = this.onRaycasterIntersectedCleared.bind(this);
 
-    this.el.addEventListener('raycaster-intersected', this.onRaycasterIntersected);
-    this.el.addEventListener('raycaster-intersected-cleared', this.onRaycasterIntersectedCleared);
+    this.el.addEventListener('mouseenter', this.onRaycasterIntersected);
+    this.el.addEventListener('mouseleave', this.onRaycasterIntersectedCleared);
   },
 
   onRaycasterIntersected: function () {
@@ -236,6 +277,97 @@ AFRAME.registerComponent('artwork-inspector', {
   }
 });
 
+/* COMPONENT: PORTAL TELEPORTER (3 SECOND RAYCASTER HOLD) */
+AFRAME.registerComponent('portal-teleporter', {
+  schema: { target: { type: 'string', default: 'lobby' } },
+
+  init: function () {
+    this.isHovering = false;
+    this.hoverStartTime = 0;
+    this.hasTriggered = false;
+    this.inspectDuration = 1500; // 1.5 detik
+
+    this.onRaycasterIntersected = this.onRaycasterIntersected.bind(this);
+    this.onRaycasterIntersectedCleared = this.onRaycasterIntersectedCleared.bind(this);
+
+    this.el.addEventListener('mouseenter', this.onRaycasterIntersected);
+    this.el.addEventListener('mouseleave', this.onRaycasterIntersectedCleared);
+  },
+
+  onRaycasterIntersected: function () {
+    this.isHovering = true;
+    this.hoverStartTime = performance.now();
+    this.hasTriggered = false;
+    const crosshair = document.querySelector('.crosshair-wrapper');
+    if (crosshair) crosshair.classList.add('hovering');
+  },
+
+  onRaycasterIntersectedCleared: function () {
+    this.isHovering = false;
+    this.hasTriggered = false;
+    this.updateProgressRing(0);
+    const crosshair = document.querySelector('.crosshair-wrapper');
+    if (crosshair) crosshair.classList.remove('hovering');
+  },
+
+  tick: function (time) {
+    if (!this.isHovering || this.hasTriggered) return;
+    const elapsed = time - this.hoverStartTime;
+    const progress = Math.min(1, elapsed / this.inspectDuration);
+    this.updateProgressRing(progress);
+
+    if (progress >= 1.0 && !this.hasTriggered) {
+      this.hasTriggered = true;
+      this.teleport();
+    }
+  },
+
+  updateProgressRing: function (progress) {
+    const circle = document.querySelector('.progress-ring-circle');
+    if (!circle) return;
+    circle.style.strokeDashoffset = 113.1 - (progress * 113.1);
+  },
+
+  teleport: function () {
+    const playerRig = document.getElementById('player-rig');
+    const fadeScreen = document.getElementById('fade-screen');
+    
+    museumAudio.playHoverChime();
+
+    // 1. Fade out to black (0.5s)
+    fadeScreen.setAttribute('animation', 'property: material.opacity; to: 1; dur: 500; easing: easeInOutQuad');
+    
+    setTimeout(() => {
+      // 2. Move player and reset camera local position
+      const cameraEl = document.getElementById('camera');
+      if (this.data.target === 'starry-castle') {
+        playerRig.setAttribute('position', '1000 1.12 1000');
+        if (cameraEl) cameraEl.setAttribute('position', '0 0 0');
+        if (typeof museumAudio !== 'undefined') museumAudio.startMagicalAmbient();
+      } else if (this.data.target === 'bedroom-arles') {
+        playerRig.setAttribute('position', '2000 1.12 1000');
+        if (cameraEl) cameraEl.setAttribute('position', '0 0 0');
+        if (typeof museumAudio !== 'undefined') museumAudio.stopMagicalAmbient();
+      } else if (this.data.target === 'lobby') {
+        playerRig.setAttribute('position', '0 1.12 13');
+        if (cameraEl) cameraEl.setAttribute('position', '0 0 0');
+        if (typeof museumAudio !== 'undefined') museumAudio.stopMagicalAmbient();
+      }
+
+      // 3. Fade back in (0.5s)
+      fadeScreen.setAttribute('animation', 'property: material.opacity; to: 0; dur: 500; easing: easeInOutQuad');
+      
+      // Reset hovering state
+      this.isHovering = false;
+      this.hasTriggered = false;
+      this.updateProgressRing(0);
+      const crosshair = document.querySelector('.crosshair-wrapper');
+      if (crosshair) crosshair.classList.remove('hovering');
+      
+    }, 550);
+  }
+});
+
 /* COMPONENT: PLAYER CONTROLLER (SPACE TO JUMP + FOOTSTEPS) */
 AFRAME.registerComponent('player-museum-controller', {
   init: function () {
@@ -259,47 +391,86 @@ AFRAME.registerComponent('player-museum-controller', {
     const dt = delta / 1000;
     if (dt > 0.1) return;
 
-    const pos = this.el.getAttribute('position');
-    if (this.isJumping || pos.y > this.floorY) {
+    // Handle jumping on the RIG
+    const rigPos = this.el.getAttribute('position');
+    if (this.isJumping || rigPos.y > this.floorY) {
       this.velocity.y += this.gravity * dt;
-      pos.y += this.velocity.y * dt;
-      if (pos.y <= this.floorY) {
-        pos.y = this.floorY;
+      rigPos.y += this.velocity.y * dt;
+      if (rigPos.y <= this.floorY) {
+        rigPos.y = this.floorY;
         this.velocity.y = 0;
         this.isJumping = false;
       }
-      this.el.setAttribute('position', pos);
+      this.el.setAttribute('position', rigPos);
     }
 
-    pos.x = Math.max(-4.2, Math.min(4.2, pos.x));
-    pos.z = Math.max(-25.5, Math.min(14.8, pos.z));
-    this.el.setAttribute('position', pos);
+    // Handle collision clamping on the CAMERA absolute world position
+    const cameraEl = document.getElementById('camera');
+    if (!cameraEl) return;
+    const camPos = cameraEl.getAttribute('position');
+    
+    let worldX = rigPos.x + camPos.x;
+    let worldZ = rigPos.z + camPos.z;
 
-    this.updateRoomTracker(pos.z);
+    if (worldX > 1500) {
+      // Bedroom in Arles Boundary (Room is 8x8, centered at 2000, 1000)
+      // X limits: 2000 - 3.8 to 2000 + 3.8
+      // Z limits: 1000 - 3.8 to 1000 + 3.8
+      worldX = Math.max(1996.2, Math.min(2003.8, worldX));
+      worldZ = Math.max(996.2, Math.min(1003.8, worldZ));
+    } else if (worldX > 500) {
+      // Starry Night 360 Boundary (Radius 40)
+      const dx = worldX - 1000;
+      const dz = worldZ - 1000;
+      const dist = Math.sqrt(dx*dx + dz*dz);
+      if (dist > 40) {
+        worldX = 1000 + (dx / dist) * 40;
+        worldZ = 1000 + (dz / dist) * 40;
+      }
+    } else {
+      // Museum Boundaries
+      worldZ = Math.max(-36.2, Math.min(14.8, worldZ));
+      
+      if (worldZ > -26.5) {
+        // Main Hall
+        worldX = Math.max(-4.2, Math.min(4.2, worldX));
+      } else {
+        // T-Junction Hallway
+        worldX = Math.max(-24.2, Math.min(24.2, worldX));
+        // Block walking back into the void from the wings
+        if (worldX > 4.2 || worldX < -4.2) {
+          worldZ = Math.max(-36.2, Math.min(-26.5, worldZ));
+        }
+      }
+    }
+
+    // Apply back to camera's local position
+    camPos.x = worldX - rigPos.x;
+    camPos.z = worldZ - rigPos.z;
+    cameraEl.setAttribute('position', camPos);
+
+    this.updateRoomTracker(worldX, worldZ);
 
     if (!this.lastPos) {
-      this.lastPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+      this.lastPos = new THREE.Vector3(worldX, rigPos.y, worldZ);
     } else {
-      const distMoved = Math.hypot(pos.x - this.lastPos.x, pos.z - this.lastPos.z);
+      const distMoved = Math.hypot(worldX - this.lastPos.x, worldZ - this.lastPos.z);
       if (distMoved > 0.05 && !this.isJumping && time - this.lastFootstepTime > 420) {
         museumAudio.playFootstep();
         this.lastFootstepTime = time;
       }
-      this.lastPos.set(pos.x, pos.y, pos.z);
+      this.lastPos.set(worldX, rigPos.y, worldZ);
     }
   },
 
-  updateRoomTracker: function (z) {
-    const roomEl = document.getElementById('current-room-text');
-    if (!roomEl) return;
-    let roomName = "Lobby";
-    if (z < -21) roomName = "Exit Area";
-    else if (z < -14) roomName = "Rotunda Van Gogh";
-    else if (z < -9) roomName = "Galeri 3: Bedroom";
-    else if (z < -3) roomName = "Galeri 2: Sunflowers";
-    else if (z < 3) roomName = "Galeri 1: Starry Night";
-    else if (z < 9) roomName = "Koridor Utama";
-    if (roomEl.textContent !== roomName) roomEl.textContent = roomName;
+  updateRoomTracker: function (worldX, worldZ) {
+    const tracker = document.getElementById('current-room-text');
+    if (!tracker) return;
+    if (worldX > 1500) tracker.innerText = 'Kamar Tidur (Bedroom in Arles)';
+    else if (worldX > 500) tracker.innerText = 'Starry Night 360';
+    else if (worldZ > 5) tracker.innerText = 'Lobi (Pintu Masuk)';
+    else if (worldZ <= 5 && worldZ > -26) tracker.innerText = 'Galeri Utama';
+    else if (worldZ <= -26) tracker.innerText = 'Lorong Museum';
   }
 });
 

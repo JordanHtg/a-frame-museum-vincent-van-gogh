@@ -94,6 +94,9 @@
       <img id="art-starry" src="assets/images/starry_night.jpg">
       <img id="art-sunflowers" src="assets/images/sunflowers.jpg">
       <img id="art-bedroom" src="assets/images/bedroom_in_arles.jpg">
+      
+      <!-- 360 Portals -->
+      <img id="img-starry-castle" src="assets/images/starry_night_castle_360.png">
 
       <!-- 3D GLB Models -->
       <a-asset-item id="van-gogh-glb" src="assets/models/van_gogh_character.glb"></a-asset-item>
@@ -127,13 +130,20 @@
               rotation="-90 0 0"></a-entity>
 
     <!-- 3. MUSEUM ARCHITECTURE (FLOOR, WALLS, CEILING, PILLARS) -->
-    <!-- Hardwood Parquet Floor -->
+    <!-- Hardwood Parquet Floor (Main Hall) -->
     <a-plane position="0 0 -6" rotation="-90 0 0" width="10" height="42"
              material="src: #tex-floor; repeat: 4 16; roughness: 0.55; metalness: 0.1"
              shadow="receive: true"></a-plane>
+    <!-- Hardwood Parquet Floor (T-Junction) -->
+    <a-plane position="0 0 -32" rotation="-90 0 0" width="50" height="10"
+             material="src: #tex-floor; repeat: 20 4; roughness: 0.55; metalness: 0.1"
+             shadow="receive: true"></a-plane>
 
-    <!-- Warm Gallery Ceiling -->
+    <!-- Warm Gallery Ceiling (Main Hall) -->
     <a-plane position="0 5.5 -6" rotation="90 0 0" width="10" height="42"
+             material="color: #FFF8EE; roughness: 0.9"></a-plane>
+    <!-- Warm Gallery Ceiling (T-Junction) -->
+    <a-plane position="0 5.5 -32" rotation="90 0 0" width="50" height="10"
              material="color: #FFF8EE; roughness: 0.9"></a-plane>
 
     <!-- West Wall (#F7F1E5 Plaster) -->
@@ -142,8 +152,21 @@
     <!-- East Wall (#F7F1E5 Plaster) -->
     <a-plane position="5 2.75 -6" rotation="0 -90 0" width="42" height="5.5"
              material="src: #tex-wall; repeat: 14 2; roughness: 0.8; color: #F7F1E5"></a-plane>
-    <!-- North Wall (End of Rotunda/Exit) -->
-    <a-plane position="0 2.75 -27" rotation="0 0 0" width="10" height="5.5"
+             
+    <!-- T-Junction North Wall -->
+    <a-plane position="0 2.75 -37" rotation="0 0 0" width="50" height="5.5"
+             material="src: #tex-wall; repeat: 16 2; roughness: 0.8; color: #F7F1E5"></a-plane>
+    <!-- T-Junction South Wall (Left Wing) -->
+    <a-plane position="-15 2.75 -27" rotation="0 180 0" width="20" height="5.5"
+             material="src: #tex-wall; repeat: 6 2; roughness: 0.8; color: #F7F1E5"></a-plane>
+    <!-- T-Junction South Wall (Right Wing) -->
+    <a-plane position="15 2.75 -27" rotation="0 180 0" width="20" height="5.5"
+             material="src: #tex-wall; repeat: 6 2; roughness: 0.8; color: #F7F1E5"></a-plane>
+    <!-- T-Junction West Wall (End of Left Wing) -->
+    <a-plane position="-25 2.75 -32" rotation="0 90 0" width="10" height="5.5"
+             material="color: #5A3E2B; roughness: 0.7"></a-plane>
+    <!-- T-Junction East Wall (End of Right Wing) -->
+    <a-plane position="25 2.75 -32" rotation="0 -90 0" width="10" height="5.5"
              material="color: #5A3E2B; roughness: 0.7"></a-plane>
     <!-- South Wall (Entrance Lobby Back Wall) -->
     <a-plane position="0 2.75 15" rotation="0 180 0" width="10" height="5.5"
@@ -216,7 +239,7 @@
                positional="true"
                distanceModel="inverse"
                refDistance="4"
-               maxDistance="20"
+               maxDistance="60"
                rolloffFactor="1.6"
                volume="4">
       </a-sound>
@@ -318,7 +341,190 @@
 
 
     <!-- =======================================================================
-         5. PLAYER RIG (FIRST PERSON CONTROLLER + RAYCASTER + SHOOTER)
+         5. 360° TELEPORT PORTALS (LEFT & RIGHT WINGS)
+         ======================================================================= -->
+    <!-- LEFT PORTAL (STARRY NIGHT CASTLE) -->
+    <a-entity position="-24.8 2.5 -32" rotation="0 90 0">
+      <a-torus radius="1.2" tube="0.05" material="color: #DDB967; metalness: 0.8; roughness: 0.2"
+               animation="property: rotation; to: 0 0 360; loop: true; dur: 10000; easing: linear"></a-torus>
+      <a-torus radius="1.25" tube="0.02" material="color: #FFB049; emissive: #FF9010; emissiveIntensity: 1; transparent: true; opacity: 0.8"
+               animation="property: scale; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; from: 0.95 0.95 0.95; to: 1.05 1.05 1.05"></a-torus>
+      <a-circle radius="1.15" material="src: #img-starry-castle; roughness: 1"
+                class="teleport-portal" portal-teleporter="target: starry-castle">
+      </a-circle>
+      <a-text value="STARRY NIGHT CASTLE 360\n(Tatap 1.5 detik untuk masuk)" align="center" position="0 -1.8 0" color="#DDB967" width="3.5"></a-text>
+    </a-entity>
+
+    <!-- RIGHT PORTAL (BEDROOM IN ARLES) -->
+    <a-entity position="24.8 2.5 -32" rotation="0 -90 0">
+      <a-torus radius="1.2" tube="0.05" material="color: #DDB967; metalness: 0.8; roughness: 0.2"
+               animation="property: rotation; to: 0 0 -360; loop: true; dur: 10000; easing: linear"></a-torus>
+      <a-torus radius="1.25" tube="0.02" material="color: #FFB049; emissive: #FF9010; emissiveIntensity: 1; transparent: true; opacity: 0.8"
+               animation="property: scale; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; from: 0.95 0.95 0.95; to: 1.05 1.05 1.05"></a-torus>
+      <a-circle radius="1.15" material="src: #art-bedroom; roughness: 1"
+                class="teleport-portal" portal-teleporter="target: bedroom-arles">
+      </a-circle>
+      <a-text value="BEDROOM IN ARLES\n(Tatap 1.5 detik untuk masuk)" align="center" position="0 -1.8 0" color="#DDB967" width="3.5"></a-text>
+    </a-entity>
+
+    <!-- =======================================================================
+         6. STARRY NIGHT CASTLE 360° ENVIRONMENT
+         ======================================================================= -->
+    <a-entity id="env-starry-castle" position="1000 0 1000">
+      <a-sky src="#img-starry-castle" radius="100" rotation="0 -35 0"></a-sky>
+      
+      <!-- 3D STYLIZED CASTLE (Starry Night Aesthetic) -->
+      <a-entity id="starry-castle-3d" position="0 -1.5 -18" rotation="0 0 0" scale="2.5 2.5 2.5">
+        <!-- Main Keep -->
+        <a-box position="0 4 0" width="6" height="8" depth="6" material="color: #1A2530; roughness: 0.9"></a-box>
+        <!-- Towers -->
+        <a-cylinder position="-3 5 3" radius="1.2" height="12" material="color: #111A22; roughness: 0.9"></a-cylinder>
+        <a-cone position="-3 12 3" radius-bottom="1.4" radius-top="0" height="3" material="color: #0A1016; roughness: 1"></a-cone>
+        <a-cylinder position="3 5 3" radius="1.2" height="12" material="color: #111A22; roughness: 0.9"></a-cylinder>
+        <a-cone position="3 12 3" radius-bottom="1.4" radius-top="0" height="3" material="color: #0A1016; roughness: 1"></a-cone>
+        <a-cylinder position="-3 6 -3" radius="1.5" height="14" material="color: #111A22; roughness: 0.9"></a-cylinder>
+        <a-cone position="-3 14 -3" radius-bottom="1.7" radius-top="0" height="4" material="color: #0A1016; roughness: 1"></a-cone>
+        <a-cylinder position="3 6 -3" radius="1.5" height="14" material="color: #111A22; roughness: 0.9"></a-cylinder>
+        <a-cone position="3 14 -3" radius-bottom="1.7" radius-top="0" height="4" material="color: #0A1016; roughness: 1"></a-cone>
+        
+        <!-- Glowing Yellow Windows -->
+        <a-plane position="0 5 3.05" width="0.8" height="1.5" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 1.5"></a-plane>
+        <a-plane position="-2.3 8 4.05" rotation="0 15 0" width="0.4" height="1" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 1.5"></a-plane>
+        <a-plane position="2.3 8 4.05" rotation="0 -15 0" width="0.4" height="1" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 1.5"></a-plane>
+        
+        <!-- Castle Base / Hill -->
+        <a-sphere position="0 0 0" radius="10" scale="1 0.25 1" material="color: #0B1610; roughness: 1"></a-sphere>
+
+        <!-- Magical Fireflies / Stars -->
+        <a-sphere position="-4 6 4" radius="0.08" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 2" animation="property: position; dir: alternate; dur: 3000; loop: true; to: -4 7 4"></a-sphere>
+        <a-sphere position="5 4 5" radius="0.12" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 2" animation="property: position; dir: alternate; dur: 4000; loop: true; to: 5 5 5"></a-sphere>
+        <a-sphere position="0 10 2" radius="0.15" material="color: #FFD700; emissive: #FFaa00; emissiveIntensity: 2" animation="property: position; dir: alternate; dur: 2500; loop: true; to: 0 9 2"></a-sphere>
+      </a-entity>
+
+      <!-- Return Portal (Placed directly behind the player so it doesn't block the castle) -->
+      <a-entity position="0 2.5 6" rotation="0 180 0">
+        <a-torus radius="1.2" tube="0.05" material="color: #DDB967; metalness: 0.8; roughness: 0.2"
+                 animation="property: rotation; to: 0 0 360; loop: true; dur: 10000; easing: linear"></a-torus>
+        <a-circle radius="1.15" material="color: #120E0A; roughness: 1"
+                  class="teleport-portal" portal-teleporter="target: lobby">
+        </a-circle>
+        <a-text value="KEMBALI KE MUSEUM\n(Tatap 1.5 detik)" align="center" position="0 -1.8 0" color="#DDB967" width="3.5"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- =======================================================================
+         7. BEDROOM IN ARLES ENVIRONMENT
+         ======================================================================= -->
+    <a-entity id="env-bedroom-arles" position="2000 0 1000">
+      <!-- Room boundaries: 8m wide, 4m high, 8m deep -->
+      <!-- Floor (Reddish Brown Wood) -->
+      <a-plane position="0 0 0" rotation="-90 0 0" width="8" height="8" material="color: #A85A32; roughness: 0.8; src: #tex-wood; repeat: 4 4"></a-plane>
+      
+      <!-- Walls (Cerulean Blue) -->
+      <!-- Back Wall -->
+      <a-plane position="0 2 -4" width="8" height="4" material="color: #8CB0D4; roughness: 0.9"></a-plane>
+      <!-- Left Wall -->
+      <a-plane position="-4 2 0" rotation="0 90 0" width="8" height="4" material="color: #8CB0D4; roughness: 0.9"></a-plane>
+      <!-- Right Wall -->
+      <a-plane position="4 2 0" rotation="0 -90 0" width="8" height="4" material="color: #8CB0D4; roughness: 0.9"></a-plane>
+      <!-- Front Wall (Behind player) -->
+      <a-plane position="0 2 4" rotation="0 180 0" width="8" height="4" material="color: #8CB0D4; roughness: 0.9"></a-plane>
+      <!-- Ceiling -->
+      <a-plane position="0 4 0" rotation="90 0 0" width="8" height="8" material="color: #e5e5cc; roughness: 0.9"></a-plane>
+
+      <!-- Yellow Bed -->
+      <a-entity id="arles-bed" position="2 0 -2" rotation="0 0 0">
+        <!-- Bed frame base -->
+        <a-box position="0 0.5 0" width="3" height="0.6" depth="2" material="color: #E5B843; roughness: 0.8; src: #tex-wood"></a-box>
+        <!-- Headboard -->
+        <a-box position="1.4 1 0" width="0.2" height="1.5" depth="2" material="color: #D4A330; roughness: 0.8; src: #tex-wood"></a-box>
+        <!-- Footboard -->
+        <a-box position="-1.4 0.8 0" width="0.2" height="1" depth="2" material="color: #D4A330; roughness: 0.8; src: #tex-wood"></a-box>
+        <!-- Mattress/Blanket (Reddish) -->
+        <a-box position="-0.2 0.85 0" width="2.4" height="0.2" depth="1.8" material="color: #A62116; roughness: 0.9"></a-box>
+        <!-- Pillows (White/Yellowish) -->
+        <a-box position="1 0.95 0.5" width="0.5" height="0.2" depth="0.7" material="color: #F0E6D2; roughness: 0.9"></a-box>
+        <a-box position="1 0.95 -0.5" width="0.5" height="0.2" depth="0.7" material="color: #F0E6D2; roughness: 0.9"></a-box>
+      </a-entity>
+
+      <!-- Chairs (Yellow Wood) -->
+      <!-- Chair 1 (Near bed) -->
+      <a-entity position="-1 0 -1" rotation="0 45 0" scale="0.8 0.8 0.8">
+        <a-box position="0 0.5 0" width="0.6" height="0.05" depth="0.6" material="color: #E5B843; roughness: 0.8; src: #tex-wood"></a-box>
+        <a-cylinder position="-0.25 0.25 -0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 0.25 -0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="-0.25 0.25 0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 0.25 0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <!-- Chair back -->
+        <a-cylinder position="-0.25 1 -0.25" radius="0.04" height="1" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 1 -0.25" radius="0.04" height="1" material="color: #D4A330"></a-cylinder>
+        <a-box position="0 1.3 -0.25" width="0.5" height="0.2" depth="0.05" material="color: #E5B843; src: #tex-wood"></a-box>
+      </a-entity>
+
+      <!-- Chair 2 (Near wall) -->
+      <a-entity position="-2.5 0 2" rotation="0 110 0" scale="0.8 0.8 0.8">
+        <a-box position="0 0.5 0" width="0.6" height="0.05" depth="0.6" material="color: #E5B843; roughness: 0.8; src: #tex-wood"></a-box>
+        <a-cylinder position="-0.25 0.25 -0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 0.25 -0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="-0.25 0.25 0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 0.25 0.25" radius="0.04" height="0.5" material="color: #D4A330"></a-cylinder>
+        <!-- Chair back -->
+        <a-cylinder position="-0.25 1 -0.25" radius="0.04" height="1" material="color: #D4A330"></a-cylinder>
+        <a-cylinder position="0.25 1 -0.25" radius="0.04" height="1" material="color: #D4A330"></a-cylinder>
+        <a-box position="0 1.3 -0.25" width="0.5" height="0.2" depth="0.05" material="color: #E5B843; src: #tex-wood"></a-box>
+      </a-entity>
+
+      <!-- Small Table -->
+      <a-entity position="-3 0 -2.5" rotation="0 15 0">
+        <a-box position="0 0.7 0" width="1" height="0.05" depth="0.8" material="color: #A0B090; roughness: 0.8"></a-box>
+        <a-cylinder position="-0.4 0.35 -0.3" radius="0.04" height="0.7" material="color: #E5B843"></a-cylinder>
+        <a-cylinder position="0.4 0.35 -0.3" radius="0.04" height="0.7" material="color: #E5B843"></a-cylinder>
+        <a-cylinder position="-0.4 0.35 0.3" radius="0.04" height="0.7" material="color: #E5B843"></a-cylinder>
+        <a-cylinder position="0.4 0.35 0.3" radius="0.04" height="0.7" material="color: #E5B843"></a-cylinder>
+        <!-- Pitcher and Bowl on table -->
+        <a-sphere position="0 0.8 0" radius="0.15" material="color: #DDEEFC; roughness: 0.5"></a-sphere>
+        <a-cylinder position="-0.3 0.75 0.1" radius="0.2" height="0.1" material="color: #DDEEFC"></a-cylinder>
+      </a-entity>
+
+      <!-- Paintings on the Wall (Reusing museum textures) -->
+      <a-plane position="3 1.8 -3.98" width="1.2" height="1.5" material="src: #art-bedroom; roughness: 1"></a-plane>
+      <a-box position="3 1.8 -3.99" width="1.3" height="1.6" depth="0.02" material="color: #332211; roughness: 0.8"></a-box>
+
+      <a-plane position="1 2.2 -3.98" width="1" height="0.8" material="src: #art-sunflowers; roughness: 1"></a-plane>
+      <a-box position="1 2.2 -3.99" width="1.1" height="0.9" depth="0.02" material="color: #332211; roughness: 0.8"></a-box>
+
+      <a-plane position="-3.98 2 1" rotation="0 90 0" width="1" height="1.2" material="src: #art-starry; roughness: 1"></a-plane>
+      <a-box position="-3.99 2 1" rotation="0 90 0" width="1.1" height="1.3" depth="0.02" material="color: #332211; roughness: 0.8"></a-box>
+
+      <!-- Window -->
+      <a-entity position="-3.98 2 -1.5" rotation="0 90 0">
+        <a-plane width="1.5" height="2" material="color: #559977; roughness: 0.8"></a-plane>
+        <!-- Window panes -->
+        <a-box position="0 0 0.02" width="0.1" height="2" depth="0.05" material="color: #225533"></a-box>
+        <a-box position="0 0 0.02" width="1.5" height="0.1" depth="0.05" material="color: #225533"></a-box>
+        <a-box position="0 1 0.02" width="1.5" height="0.1" depth="0.05" material="color: #225533"></a-box>
+        <a-box position="0 -1 0.02" width="1.5" height="0.1" depth="0.05" material="color: #225533"></a-box>
+        <a-box position="0.75 0 0.02" width="0.1" height="2" depth="0.05" material="color: #225533"></a-box>
+        <a-box position="-0.75 0 0.02" width="0.1" height="2" depth="0.05" material="color: #225533"></a-box>
+      </a-entity>
+
+      <!-- Point Light representing room lighting -->
+      <a-light type="point" position="0 3 0" color="#FFEDB3" intensity="0.6" distance="15"></a-light>
+      <a-light type="ambient" color="#AABBDD" intensity="0.4"></a-light>
+
+      <!-- Return Portal (To Lobby) -->
+      <a-entity position="0 1.2 3.8" rotation="0 180 0" scale="0.8 0.8 0.8">
+        <a-torus radius="1.2" tube="0.05" material="color: #DDB967; metalness: 0.8; roughness: 0.2"
+                 animation="property: rotation; to: 0 0 360; loop: true; dur: 10000; easing: linear"></a-torus>
+        <a-circle radius="1.15" material="color: #120E0A; roughness: 1"
+                  class="teleport-portal" portal-teleporter="target: lobby">
+        </a-circle>
+        <a-text value="KEMBALI KE MUSEUM\n(Tatap 1.5 detik)" align="center" position="0 -1.8 0" color="#DDB967" width="3.5"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- =======================================================================
+         7. PLAYER RIG (FIRST PERSON CONTROLLER + RAYCASTER + SHOOTER)
          ======================================================================= -->
     <a-entity id="player-rig"
               position="0 1.12 13"
@@ -330,9 +536,13 @@
                 wasd-controls="acceleration: 15"
                 look-controls="pointerLockEnabled: true">
 
-        <!-- RAYCASTER CENTER FOR DETECTING GOLD SPHERES -->
+        <!-- Fade Screen for Teleportation Transition -->
+        <a-plane id="fade-screen" color="#000" width="10" height="10" position="0 0 -0.1" material="transparent: true; opacity: 0; depthTest: false"></a-plane>
+
+        <!-- RAYCASTER CENTER FOR DETECTING GOLD SPHERES & PORTALS -->
         <a-entity id="raycaster-cursor"
-                  raycaster="objects: .interactive-sphere; interval: 50"
+                  cursor="fuse: false"
+                  raycaster="objects: .interactive-sphere, .teleport-portal; interval: 50"
                   position="0 0 -1">
         </a-entity>
       </a-camera>
